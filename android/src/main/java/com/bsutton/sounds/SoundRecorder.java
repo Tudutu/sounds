@@ -81,6 +81,13 @@ public class SoundRecorder {
 		getPlugin().invokeCallback(methodName, dic);
 	}
 
+	void invokeCallbackWithMap(String methodName, Map<String, Object> arg) {
+		Map<String, Object> dic = new HashMap<String, Object>();
+		dic.put("slotNo", slotNo);
+		dic.put("arg", arg);
+		getPlugin().invokeCallback(methodName, dic);
+	}
+
 	void invokeCallbackWithDouble(String methodName, double arg) {
 		Map<String, Object> dic = new HashMap<String, Object>();
 		dic.put("slotNo", slotNo);
@@ -283,11 +290,14 @@ public class SoundRecorder {
 	private void sendProgressUpdate() {
 		long time = SystemClock.elapsedRealtime() - model.startTime;
 		try {
-			JSONObject json = new JSONObject();
-			json.put("current_position", String.valueOf(time));
-			json.put("decibels", String.valueOf(getDbLevel()));
-			invokeCallbackWithString("updateProgress", json.toString());
-			// Log.d(TAG, "updateProgress: " + json.toString());
+			double dbLevel = getDbLevel();
+			if(dbLevel != 0.0) {
+				Map<String, Object> dic = new HashMap<String, Object>();
+				dic.put("current_position", time);
+				dic.put("decibels", dbLevel);
+				invokeCallbackWithMap("updateProgress", dic);
+				// Log.d(TAG, "updateProgress: " + json.toString());
+			}
 
 			// re-queue ourselves based on the desired subscription interval.
 			boolean queued = progressTickHandler.postDelayed(() -> sendProgressUpdate(),

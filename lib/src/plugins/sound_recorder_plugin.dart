@@ -120,12 +120,11 @@ class SoundRecorderPlugin extends BasePlugin {
   }
 
   void _updateProgress(MethodCall call, sound_recorder.SoundRecorder recorder) {
-    var result = convert.json.decode(call.arguments['arg'] as String)
-        as Map<String, dynamic>;
+    var result = call.arguments['arg'] as Map<dynamic, dynamic>;
 
-    var duration =
-        Duration(milliseconds: int.parse(result['current_position'] as String));
-    var decibels = double.parse(result['decibels'] as String);
+    final currentPosition = result['current_position'] as double;
+    var duration = Duration(milliseconds: currentPosition.toInt());
+    var decibels = result['decibels'] as double;
 
     // We use max to ensure that we always report a +ve db.
     // We have seen -ve db come up from the OS which is not

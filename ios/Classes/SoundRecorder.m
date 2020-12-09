@@ -183,6 +183,12 @@ extern void SoundRecorderReg(NSObject<FlutterPluginRegistrar>* registrar)
         [[self getPlugin] invokeCallback: methodName arguments: dic ];
 }
 
+- (void)invokeCallback: (NSString*)methodName dictArg: (NSDictionary*)dictArg
+{
+        NSDictionary* dic = @{ @"slotNo": [NSNumber numberWithInt: slotNo], @"arg": dictArg};
+        [[self getPlugin] invokeCallback: methodName arguments: dic ];
+}
+
 
 - (void)invokeCallback: (NSString*)methodName numberArg: (NSNumber*)arg
 {
@@ -347,38 +353,29 @@ extern void SoundRecorderReg(NSObject<FlutterPluginRegistrar>* registrar)
 - (void)updateProgress:(NSTimer*) atimer
 {
         assert (progressTimer == atimer);
-        double decibels = [self getDbLevel];
-        NSNumber *currentTime = [NSNumber numberWithDouble:audioRecorder.currentTime * 1000];
         [audioRecorder updateMeters];
+        double peakDb = [self getDbLevel];
+        NSNumber *currentTime = [NSNumber numberWithDouble:audioRecorder.currentTime * 1000];
 
-        NSString* status = [NSString stringWithFormat:@"{\"current_position\": \"%@\", \"decibels\":\"%lf\"}"
-                , [currentTime stringValue]
-                , decibels
-                ];
+        NSDictionary* status = @{ 
+                @"current_position": currentTime, 
+                @"decibels" : [NSNumber numberWithDouble: peakDb ]};
         NSLog(@"updateProgress: %@",  status);
-        [self invokeCallback:@"updateProgress" stringArg: status];
+        [self invokeCallback:@"updateProgress" dictArg: status];
 }
 
 
 - (double)getDbLevel
 {
-        // NSNumber *normalizedPeakLevel = [NSNumber numberWithDouble:MIN(pow(10.0, [audioRecorder peakPowerForChannel:0] / 20.0) * 160.0, 160.0)];
-        [audioRecorder updateMeters];
         // silence is -160 max volume is 0 hence +160 as below calc only worksfor +ve no.s
-        double maxAmplitude = [audioRecorder peakPowerForChannel:0] + 160;
+        double maxAmplitude = [audioRecorder averagePowerForChannel:0] + 160.0;
 
         double db = 0;
 
-        if (maxAmplitude != 0)
+        if (maxAmplitude > 0.0)
         {
-                // Calculate db based on the following article.
-                // https://stackoverflow.com/questions/10655703/what-does-androids-getmaxamplitude-function-for-the-mediarecorder-actually-gi
-                //
-                double ref_pressure = 51805.5336;
-                double p            = maxAmplitude / ref_pressure;
-                double p0           = 0.0002;
-
-                db = 20.0 * log10 ( p / p0 );
+                // Normalize the peak levels
+                db = MIN(pow(10.0, (maxAmplitude - 160.0) / 20.0) * 160.0, 160.0);
         }
         
         return db;
