@@ -288,7 +288,7 @@ public class SoundRecorder {
 	// This method then re-queues itself.
 	@UiThread
 	private void sendProgressUpdate() {
-		long time = SystemClock.elapsedRealtime() - model.startTime;
+		double time = SystemClock.elapsedRealtime() - model.startTime;
 		try {
 			double dbLevel = getDbLevel();
 			if(dbLevel != 0.0) {
