@@ -15,7 +15,7 @@ dependencies:
   path_provider: ^1.6.7
   provider: ^4.1.0
   sounds_common: ^1.0.6
-  uuid: ^2.0.4
+  uuid: ^3.0.1
   flutter: 
     sdk: flutter
 dev_dependencies: 
