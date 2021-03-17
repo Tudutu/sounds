@@ -30,7 +30,7 @@ class RecorderPlaybackController extends InheritedWidget {
   final _RecordPlaybackControllerState _state;
 
   ///
-  RecorderPlaybackController({@required Widget child, Key key})
+  RecorderPlaybackController({required Widget child, Key? key})
       : _state = _RecordPlaybackControllerState(),
         super(child: child);
 
@@ -44,13 +44,13 @@ class RecorderPlaybackController extends InheritedWidget {
 
   /// of - find the nearest RecorderPlaybackController in the parent widget
   /// tree.
-  static RecorderPlaybackController of(BuildContext context) =>
+  static RecorderPlaybackController? of(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<RecorderPlaybackController>();
 }
 
 class _RecordPlaybackControllerState {
-  SoundRecorderUIState _recorderState;
-  SoundPlayerUIState _playerState;
+  SoundRecorderUIState? _recorderState;
+  SoundPlayerUIState? _playerState;
 
   /// Proxies recording events into playback events.
   /// So we can have the SoundPlayerUI update as the
@@ -67,8 +67,8 @@ class _RecordPlaybackControllerState {
   void _onRecorderStarted() {
     Log.d('_onRecorderStarted');
     if (_playerState != null) {
-      _playerState.stop().then((_) {
-        _playerState.enablePlayback(enabled: false);
+      _playerState?.stop().then((_) {
+        _playerState?.enablePlayback(enabled: false);
 
         // attach the player to the recorder stream so it can
         // show the duration updating

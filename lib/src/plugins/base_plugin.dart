@@ -34,11 +34,11 @@ class SlotEntry {}
 // ignore: prefer_mixin
 abstract class BasePlugin with WidgetsBindingObserver {
   /// ignore: prefer_final_fields
-  List<SlotEntry> _slots;
+  List<SlotEntry?> _slots;
 
   ///
   @protected
-  MethodChannel _channel;
+  MethodChannel? _channel;
 
   /// The registered name of the plugin.
   final String _registeredName;
@@ -48,9 +48,9 @@ abstract class BasePlugin with WidgetsBindingObserver {
   BasePlugin(this._registeredName, this._slots) {
     Log.d('registering plugin: $_registeredName');
     _channel = MethodChannel(_registeredName);
-    _channel.setMethodCallHandler(_onMethodCallback);
+    _channel!.setMethodCallHandler(_onMethodCallback);
 
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance!.addObserver(this);
   }
 
   /// This method is currently not used as we are a singleton
@@ -59,7 +59,7 @@ abstract class BasePlugin with WidgetsBindingObserver {
   /// these events until the app stops in which case it will
   /// be freed automatically.
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance!.removeObserver(this);
   }
 
   @override
@@ -82,7 +82,7 @@ abstract class BasePlugin with WidgetsBindingObserver {
 
   /// overload this method to handle callbacks from the underlying
   /// platform specific plugin
-  Future<dynamic> onMethodCallback(SlotEntry slotEntry, MethodCall call);
+  Future<dynamic> onMethodCallback(SlotEntry? slotEntry, MethodCall call);
 
   Future<dynamic> _onMethodCallback(MethodCall call) {
     var slotNo = call.arguments['slotNo'] as int;
@@ -109,7 +109,7 @@ abstract class BasePlugin with WidgetsBindingObserver {
     }
 
     call['slotNo'] = slotNo;
-    var result = _channel.invokeMethod<dynamic>(methodName, call);
+    var result = _channel!.invokeMethod<dynamic>(methodName, call);
 
     Log.d('invokeMethod returned for $methodName slot: $slotNo');
     return result;

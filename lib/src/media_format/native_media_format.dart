@@ -17,7 +17,7 @@ import 'native_media_formats.dart';
 abstract class NativeMediaFormat extends MediaFormat {
   ///
   const NativeMediaFormat.detail({
-    @required String name,
+    @required String? name,
     int sampleRate = 16000,
     int numChannels = 1,
     int bitRate = 16000,

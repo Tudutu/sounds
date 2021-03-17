@@ -47,9 +47,9 @@ class SoundPlayerUI extends StatefulWidget {
   /// If the fromLoader ctor is used this will be null
   /// until the user clicks the Play button and onLoad
   /// returns a non null [Track]
-  final Track _track;
+  final Track? _track;
 
-  final OnLoad _onLoad;
+  final OnLoad? _onLoad;
 
   final bool _enabled;
 
@@ -72,7 +72,7 @@ class SoundPlayerUI extends StatefulWidget {
   /// By default we use [AudioFocus.focusAndHushOthers] which will
   /// reduce the volume of any other players.
   SoundPlayerUI.fromTrack(Track track,
-      {Key key,
+      {Key? key,
       bool showTitle = false,
       bool enabled = true,
       AudioFocus audioFocus = AudioFocus.focusAndHushOthers})
@@ -108,7 +108,7 @@ class SoundPlayerUI extends StatefulWidget {
   /// By default we use [AudioFocus.focusAndHushOthers] which will
   /// reduce the volume of any other players.
   SoundPlayerUI.fromLoader(OnLoad onLoad,
-      {Key key,
+      {Key? key,
       bool showTitle = false,
       bool enabled = true,
       AudioFocus audioFocus = AudioFocus.focusAndHushOthers})
@@ -151,13 +151,13 @@ class SoundPlayerUIState extends State<SoundPlayerUI> {
   /// we called [play] and the [_loader] method was called.
   /// If the widget was constructed with a call to [fromTrack] then
   /// we use the track i the widget.
-  Track _loadedTrack;
+  Track? _loadedTrack;
 
-  StreamSubscription _playerSubscription;
+  StreamSubscription? _playerSubscription;
 
   /// returns the active track.
   /// If [fromLoader] was called then this may return null.
-  Track get track {
+  Track? get track {
     if (widget._onLoad != null) {
       return _loadedTrack;
     } else {
@@ -166,7 +166,7 @@ class SoundPlayerUIState extends State<SoundPlayerUI> {
   }
 
   ///
-  SoundPlayerUIState({bool enabled})
+  SoundPlayerUIState({required bool enabled})
       : _player = SoundPlayer.noUI(),
         _localController = StreamController<PlaybackDisposition>.broadcast() {
     _sliderPosition.position = Duration(seconds: 0);
@@ -191,7 +191,7 @@ class SoundPlayerUIState extends State<SoundPlayerUI> {
   /// We can play if we have a non-zero track length or we are dynamically
   /// loading tracks via _onLoad.
   Future<bool> get canPlay async {
-    return widget._onLoad != null || (track != null && (track.length > 0));
+    return widget._onLoad != null || (track != null && ((track?.length ?? 0) > 0));
   }
 
   /// detect hot reloads when debugging and stop the player.
@@ -541,8 +541,8 @@ class SoundPlayerUIState extends State<SoundPlayerUI> {
                         var disposition = asyncData.data;
                         // Log.e(yellow('state ${disposition.state} '
                         //     'progress: ${disposition.progress}'));
-                        var progress = 0.0;
-                        switch (disposition.state) {
+                        double? progress = 0.0;
+                        switch (disposition!.state) {
                           case PlaybackDispositionState.preload:
                             progress = null; // indeterminate
                             break;
@@ -576,7 +576,7 @@ class SoundPlayerUIState extends State<SoundPlayerUI> {
                 builder: (context, asyncData) {
                   var _canPlay = false;
                   if (asyncData.connectionState == ConnectionState.done) {
-                    _canPlay = asyncData.data && !__transitioning;
+                    _canPlay = asyncData.data! && !__transitioning;
                   }
 
                   return InkWell(
@@ -595,12 +595,12 @@ class SoundPlayerUIState extends State<SoundPlayerUI> {
         widget = FutureBuilder<bool>(
             future: canPlay,
             builder: (context, asyncData) {
-              var canPlay = false;
+              bool? canPlay = false;
               if (asyncData.connectionState == ConnectionState.done) {
                 canPlay = asyncData.data;
               }
               return Icon(Icons.play_arrow,
-                  color: canPlay ? Colors.black : Colors.blueGrey);
+                  color: (canPlay ?? false) ? Colors.black : Colors.blueGrey);
             });
         break;
       case PlayState.disabled:
@@ -619,9 +619,11 @@ class SoundPlayerUIState extends State<SoundPlayerUI> {
         builder: (context, snapshot) {
           var disposition = snapshot.data;
           return Text(
-              '${Format.duration(disposition.position, showSuffix: false)}'
+              disposition != null 
+              ? ('${Format.duration(disposition.position, showSuffix: false)}',
               ' / '
-              '${Format.duration(disposition.duration)}');
+              '${Format.duration(disposition.duration)}') 
+              : '');
         });
   }
 
@@ -677,7 +679,7 @@ enum PlayState {
 // , Duration duration) =>
 //     playerState?._updateDuration(duration);
 
-void connectPlayerToRecorderStream(SoundPlayerUIState playerState,
+void connectPlayerToRecorderStream(SoundPlayerUIState? playerState,
     Stream<PlaybackDisposition> recorderStream) {
-  playerState._connectRecorderStream(recorderStream);
+  playerState?._connectRecorderStream(recorderStream);
 }

@@ -72,12 +72,6 @@ class SoundExampleApp extends StatelessWidget {
     var storageRequired = false;
 
     if (usingExternalStorage) {
-      /// only required if track is on external storage
-      if (Permission.storage.status == PermissionStatus.undetermined) {
-        print('You are probably missing the storage permission '
-            'in your manifest.');
-      }
-
       storageRequired =
           usingExternalStorage && !await Permission.storage.isGranted;
     }
@@ -114,7 +108,7 @@ class SoundExampleApp extends StatelessWidget {
       }
 
       /// tell the user we are about to ask for permissions.
-      if (await showAlertDialog(context, reason)) {
+      if (await showAlertDialog(context, reason) ?? false) {
         var permissions = <Permission>[];
         if (microphoneRequired) permissions.add(Permission.microphone);
         if (storageRequired) permissions.add(Permission.storage);
@@ -149,7 +143,7 @@ class SoundExampleApp extends StatelessWidget {
   }
 
   ///
-  Future<bool> showAlertDialog(BuildContext context, String prompt) {
+  Future<bool?> showAlertDialog(BuildContext context, String prompt) {
     // set up the buttons
     Widget cancelButton = FlatButton(
       child: Text("Cancel"),
@@ -171,7 +165,7 @@ class SoundExampleApp extends StatelessWidget {
     );
 
     // show the dialog
-    return showDialog<bool>(
+    return showDialog<bool?>(
       context: context,
       builder: (context) {
         return alert;

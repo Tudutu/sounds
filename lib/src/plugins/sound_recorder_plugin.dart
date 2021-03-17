@@ -33,12 +33,12 @@ class SoundRecorderPlugin extends BasePlugin {
   /// ignore: prefer_final_fields
   static var _slots = <SlotEntry>[];
 
-  static SoundRecorderPlugin _self;
+  static SoundRecorderPlugin? _self;
 
   /// Factory
   factory SoundRecorderPlugin() {
     _self ??= SoundRecorderPlugin._internal();
-    return _self;
+    return _self!;
   }
   SoundRecorderPlugin._internal()
       : super('com.bsutton.sounds.sound_recorder', _slots);
@@ -116,7 +116,7 @@ class SoundRecorderPlugin extends BasePlugin {
       default:
         throw ArgumentError('Unknown method ${call.method}');
     }
-    return null;
+    return Future<dynamic>.value(0);
   }
 
   void _updateProgress(MethodCall call, sound_recorder.SoundRecorder recorder) {
