@@ -1,5 +1,6 @@
 name: sounds
 version: 1.0.0-beta.7-nullsafety
+publish_to: none
 homepage: https://github.com/bsutton/sounds
 documentation: https://github.com/bsutton/sounds/wiki
 description: Sounds provide a complete api and Widgets for audio playback and
@@ -16,7 +17,11 @@ dependencies:
   path: ^1.8.0
   path_provider: ^2.0.1
   provider: ^5.0.0
-  sounds_common: ^1.0.9-nullsafety
+  sounds_common:
+    # path: ../sounds_common
+    git:
+      url: ssh://git@github.com/tudutu/sounds_common.git
+      ref: 24ffaf8
   uuid: ^3.0.1
 dev_dependencies:
   flutter_test:
@@ -33,11 +38,6 @@ dependency_overrides:
   uuid: ^3.0.1
   crypto: ^3.0.0
   intl: ^0.17.0
-  sounds_common:
-    # path: ../sounds_common
-    git:
-      url: ssh://git@github.com/tudutu/sounds_common.git
-      ref: 24ffaf8
 flutter:
   plugin:
     platforms:
