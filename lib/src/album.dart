@@ -9,35 +9,35 @@ typedef TrackChange = Track Function(int currentTrackIndex, Track current);
 /// the OS's builtin audio UI.
 ///
 class Album {
-  SoundPlayer _player;
+  SoundPlayer? _player;
 
   final bool _virtualAlbum;
 
-  List<Track> _tracks;
+  List<Track>? _tracks;
 
   var _currentTrackIndex = 0;
 
   /// Returns the track that is currently selected.
-  Track _currentTrack;
+  Track? _currentTrack;
 
   /// If you use the [Album.virtual] constructor then
   /// you must provide a handler for [onFirstTrack].
   /// This should return the first track of the album.
   /// This call may be made multiple times (each time
   /// the method [play] is called).
-  Track Function() onFirstTrack;
+  Track Function()? onFirstTrack;
 
   /// If you use the [Album.virtual] constructor then
   /// you need to provide a handlers for [onSkipForward]
   /// method.
   /// see [Album.virtual()] for details.
-  TrackChange onSkipForward;
+  TrackChange? onSkipForward;
 
   /// If you use the [Album.virtual] constructor then
   /// you need to provide a handlers for [onSkipbackward]
   /// method.
   /// see [Album.virtual()] for details.
-  TrackChange onSkipBackward;
+  TrackChange? onSkipBackward;
 
   /// Creates an album of tracks which will be played
   /// via the OS' built in player.
@@ -46,21 +46,21 @@ class Album {
   /// By default the Album displays on the OS' audio player.
   /// To suppress the OS' audio player pass [SoundPlayer.noUI()]
   /// to [player].
-  Album.fromTracks(this._tracks, SoundPlayer player) : _virtualAlbum = false {
+  Album.fromTracks(this._tracks, SoundPlayer? player) : _virtualAlbum = false {
     Album._internal(player, _virtualAlbum);
 
-    if (_tracks.isEmpty) {
+    if ((_tracks?.isEmpty ?? true)) {
       throw NoTracksAlbumException('You must pass at least one track');
     }
   }
 
-  Album._internal(SoundPlayer player, bool virtualAlbum)
+  Album._internal(SoundPlayer? player, bool virtualAlbum)
       : _virtualAlbum = virtualAlbum {
     _player = player ?? SoundPlayer.withShadeUI();
 
-    _player.onSkipBackward = _skipBackward;
-    _player.onSkipForward = _skipForward;
-    _player.onStopped = _onStopped;
+    _player!.onSkipBackward = _skipBackward;
+    _player!.onSkipForward = _skipForward;
+    _player!.onStopped = _onStopped;
   }
 
   /// Creates a virtual album which will be played
@@ -79,7 +79,7 @@ class Album {
     Album._internal(player, _virtualAlbum);
   }
 
-  void _onStopped({bool wasUser}) {}
+  void _onStopped({bool wasUser = false}) {}
 
   void _skipBackward() {
     if (_currentTrackIndex > 1) {
@@ -99,7 +99,7 @@ class Album {
   }
 
   void _skipForward() {
-    if (_tracks == null || _currentTrackIndex < _tracks.length - 1) {
+    if (_tracks == null || _currentTrackIndex < _tracks!.length - 1) {
       stop(wasUser: true);
 
       _currentTrack = _nextTrack();
@@ -115,19 +115,19 @@ class Album {
   /// finds the previous track.
   /// If the album is virtual it calls out
   /// to get the next track.
-  Track _previousTrack() {
-    Track previous;
+  Track? _previousTrack() {
+    Track? previous;
     var originalIndex = _currentTrackIndex;
     _currentTrackIndex--;
     if (_virtualAlbum) {
-      if (onSkipBackward != null) {
-        previous = onSkipBackward(
+      if (onSkipBackward != null && _currentTrack != null) {
+        previous = onSkipBackward!(
           originalIndex,
-          _currentTrack,
+          _currentTrack!,
         );
       }
     } else {
-      previous = _tracks[_currentTrackIndex];
+      previous = _tracks![_currentTrackIndex];
     }
     return previous;
   }
@@ -135,19 +135,19 @@ class Album {
   /// finds the next track .
   /// If the album is virtual it calls out
   /// to get the next track.
-  Track _nextTrack() {
-    Track next;
+  Track? _nextTrack() {
+    Track? next;
     var originalIndex = _currentTrackIndex;
     _currentTrackIndex++;
     if (_virtualAlbum) {
-      if (onSkipForward != null) {
-        next = onSkipForward(
+      if (onSkipForward != null && _currentTrack != null) {
+        next = onSkipForward!(
           originalIndex,
-          _currentTrack,
+          _currentTrack!,
         );
       }
     } else {
-      next = _tracks[_currentTrackIndex];
+      next = _tracks![_currentTrackIndex];
     }
     return next;
   }
@@ -156,27 +156,31 @@ class Album {
   void play() {
     _currentTrackIndex = 0;
     if (_virtualAlbum) {
-      _currentTrack = onFirstTrack();
+      _currentTrack = onFirstTrack?.call();
     } else {
-      _currentTrack = _tracks[_currentTrackIndex];
+      _currentTrack = _tracks![_currentTrackIndex];
     }
-    _player.play(_currentTrack);
+    if (_player != null && _currentTrack != null) {
+      _player!.play(_currentTrack!);
+    }
   }
 
   /// stop the album playing.
-  void stop({@required bool wasUser}) {
-    _player.stop(wasUser: wasUser);
-    trackRelease(_currentTrack);
+  void stop({required bool wasUser}) {
+    _player?.stop(wasUser: wasUser);
+    if (_currentTrack != null) {
+      trackRelease(_currentTrack!);
+    }
   }
 
   /// pause the album playing
   void pause() {
-    _player.pause();
+    _player?.pause();
   }
 
   /// resume the album playing.
   void resume() {
-    _player.resume();
+    _player?.resume();
   }
 }
 

@@ -1,39 +1,48 @@
 name: sounds
-version: 1.0.0-beta.7
+version: 1.0.0-beta.7-nullsafety
 homepage: https://github.com/bsutton/sounds
 documentation: https://github.com/bsutton/sounds/wiki
-description: Sounds provide a complete api and Widgets for audio playback and recording. Both iOS and Android are supported.
+description: Sounds provide a complete api and Widgets for audio playback and
+  recording. Both iOS and Android are supported.
 repository: https://github.com/bsutton/sounds
-environment: 
+environment:
   sdk: '>=2.12.0 <3.0.0'
-dependencies: 
+dependencies:
+  flutter:
+    sdk: flutter
   device_info: ^2.0.0
   flutter_spinkit: ^5.0.0
   meta: ^1.3.0
   path: ^1.8.0
   path_provider: ^2.0.1
   provider: ^5.0.0
-  sounds_common: ^1.0.8
+  sounds_common: ^1.0.9-nullsafety
   uuid: ^3.0.1
-  flutter: 
+dev_dependencies:
+  flutter_test:
     sdk: flutter
-dev_dependencies: 
   dart_numerics: ^0.0.5
-  pedantic: ^1.9.0
-  effective_dart: ^1.2.1
   dshell: ^1.0.0
+  effective_dart: ^1.2.1
+  integration_test: ^1.0.2+2
   lint: ^1.1.1
+  pedantic: ^1.9.0
   pub_semver: ^1.4.4
-  flutter_test: 
-    sdk: flutter
 dependency_overrides:
   # 5/3/21 Breaking changes due to Flutter 2 upgrade
   uuid: ^3.0.1
-flutter: 
-  plugin: 
-    platforms: 
-      android: 
+  crypto: ^3.0.0
+  intl: ^0.17.0
+  sounds_common:
+    # path: ../sounds_common
+    git:
+      url: ssh://git@github.com/tudutu/sounds_common.git
+      ref: 24ffaf8
+flutter:
+  plugin:
+    platforms:
+      android:
         package: com.bsutton.sounds
         pluginClass: Sounds
-      ios: 
+      ios:
         pluginClass: Sounds

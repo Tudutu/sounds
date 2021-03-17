@@ -82,7 +82,7 @@ class _RecordPlaybackControllerState {
   void _onRecorderStopped(Duration duration) {
     Log.d('_onRecorderStopped');
     if (_playerState != null) {
-      _playerState.enablePlayback(enabled: true);
+      _playerState!.enablePlayback(enabled: true);
 
       /// detach the player stream from the recorder stream.
       /// The player will now re-attached to the AudioPlayer stream
@@ -95,7 +95,7 @@ class _RecordPlaybackControllerState {
     _recorderState = recorderState;
 
     // wire our local stream to take events from the recording.
-    _recorderState.dispositionStream.listen((recorderDisposition) =>
+    _recorderState?.dispositionStream?.listen((recorderDisposition) =>
         _localController.add(PlaybackDisposition.recording(
             duration: recorderDisposition.duration)));
   }
@@ -120,12 +120,12 @@ void registerPlayer(BuildContext context, SoundPlayerUIState player) {
 
 ///
 void onRecordingStarted(BuildContext context) {
-  RecorderPlaybackController.of(context)._state._onRecorderStarted();
+  RecorderPlaybackController.of(context)?._state._onRecorderStarted();
 }
 
 ///
 void onRecordingStopped(BuildContext context, Duration duration) {
-  RecorderPlaybackController.of(context)._state._onRecorderStopped(duration);
+  RecorderPlaybackController.of(context)?._state._onRecorderStopped(duration);
 }
 
 // ///

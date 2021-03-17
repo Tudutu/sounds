@@ -26,10 +26,10 @@ typedef UIRequestPermission = Future<bool> Function(
 /// A UI for recording audio.
 class SoundRecorderUI extends StatefulWidget {
   /// Callback to be notified when the recording stops
-  final OnStop onStopped;
+  final OnStop? onStopped;
 
   /// Callback to be notified when the recording starts.
-  final OnStart onStart;
+  final OnStart? onStart;
 
   /// Stores and Tracks the recorded audio.
   final RecordedAudio audio;
@@ -55,7 +55,7 @@ class SoundRecorderUI extends StatefulWidget {
   /// This method will be called even if we have the necessary permissions
   /// as we make no checks.
   ///
-  final UIRequestPermission requestPermissions;
+  final UIRequestPermission? requestPermissions;
 
   ///
   /// Records audio from the users microphone into the given media file.
@@ -109,7 +109,7 @@ class SoundRecorderUI extends StatefulWidget {
     this.onStart,
     this.onStopped,
     this.requestPermissions,
-    Key key,
+    Key? key,
   })  : audio = RecordedAudio.recordTo(track),
         super(key: key);
 
@@ -128,8 +128,7 @@ class SoundRecorderUIState extends State<SoundRecorderUI> {
   //var fakeStream = StreamController<RecordingDisposition>();
 
   ///
-  SoundRecorderUIState() {
-    _recorder = SoundRecorder();
+  SoundRecorderUIState() : _recorder = SoundRecorder() {
     _recorder.onStarted = _onStarted;
     _recorder.onStopped = _onStopped;
   }
@@ -164,7 +163,7 @@ class SoundRecorderUIState extends State<SoundRecorderUI> {
   }
 
   ///
-  Stream<RecordingDisposition> get dispositionStream =>
+  Stream<RecordingDisposition>? get dispositionStream =>
       _recorder.dispositionStream();
 
   // _minDbCircle so the animated circle is always a
@@ -182,13 +181,13 @@ class SoundRecorderUIState extends State<SoundRecorderUI> {
             initialData: RecordingDisposition.zero(), // was START_DECIBELS
             builder: (_, streamData) {
               var disposition = streamData.data;
-              print(disposition.decibels);
+              print(disposition?.decibels);
               //      onRecorderProgress(context, this, disposition.duration);
               return Stack(alignment: Alignment.center, children: [
                 AnimatedContainer(
                   duration: Duration(milliseconds: 180),
-                  width: disposition.decibels * 2 + _minDbCircle,
-                  height: disposition.decibels * 2 + _minDbCircle,
+                  width: disposition!.decibels * 2 + _minDbCircle,
+                  height: disposition!.decibels * 2 + _minDbCircle,
                   constraints: BoxConstraints(
                       maxHeight: 80.0 + _minDbCircle,
                       maxWidth: 80.0 + _minDbCircle),
@@ -272,7 +271,7 @@ class SoundRecorderUIState extends State<SoundRecorderUI> {
       /// ask the user before we actually ask the OS so
       /// the dev has a chance to inform the user as to why we need
       /// permissions.
-      request = widget.requestPermissions(context, track);
+      request = widget.requestPermissions!(context, track);
     } else {
       request = Future.value(true);
     }
@@ -289,7 +288,7 @@ class SoundRecorderUIState extends State<SoundRecorderUI> {
     return requesting.future;
   }
 
-  void _onStarted({bool wasUser}) async {
+  void _onStarted({bool wasUser = false}) async {
     Log.d(green('started Recording to: '
         '${widget.audio.track.identity})'));
 
@@ -297,20 +296,20 @@ class SoundRecorderUIState extends State<SoundRecorderUI> {
       _state = _RecorderState.isRecording;
 
       if (widget.onStart != null) {
-        widget.onStart();
+        widget.onStart!();
       }
 
       controller.onRecordingStarted(context);
     });
   }
 
-  void _onStopped({bool wasUser}) {
+  void _onStopped({bool wasUser = false}) {
     setState(() {
       _updateDuration(_recorder.duration);
       _state = _RecorderState.isStopped;
 
       if (widget.onStopped != null) {
-        widget.onStopped(widget.audio);
+        widget.onStopped!(widget.audio);
       }
 
       controller.onRecordingStopped(context, _recorder.duration);

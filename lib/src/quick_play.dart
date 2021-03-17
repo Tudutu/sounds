@@ -43,9 +43,9 @@ import 'sound_player.dart';
 /// QuickPlay.fromTrack(track, volume: 1.0, withShadeUI: true);
 
 class QuickPlay {
-  SoundPlayer _player;
-  Track _track;
-  PlayerEvent _onStopped;
+  SoundPlayer? _player;
+  Track? _track;
+  PlayerEvent? _onStopped;
 
   /// Creates a QuickPlay from a Track and immediately plays it.
   /// By default no UI is displayed.
@@ -57,7 +57,7 @@ class QuickPlay {
   /// Pass a callback to [onStopped] if you want to be notified
   /// that audio has stopped playing.
   QuickPlay.fromTrack(this._track,
-      {double volume, bool withShadeUI = false, PlayerEvent onStopped})
+      {double volume = 0.0, bool withShadeUI = false, PlayerEvent? onStopped})
       : _onStopped = onStopped {
     QuickPlay._internal(volume, withShadeUI);
   }
@@ -95,7 +95,7 @@ class QuickPlay {
   /// Pass a callback to [onStopped] if you want to be notified
   /// that audio has stopped playing.
   QuickPlay.fromFile(String path,
-      {double volume, bool withShadeUI = false, PlayerEvent onStopped})
+      {double volume = 0.0, bool withShadeUI = false, PlayerEvent? onStopped})
       : _onStopped = onStopped {
     _track = Track.fromFile(path);
     QuickPlay._internal(volume, withShadeUI);
@@ -118,7 +118,7 @@ class QuickPlay {
   /// Pass a callback to [onStopped] if you want to be notified
   /// that audio has stopped playing.
   QuickPlay.fromURL(String url,
-      {double volume, bool withShadeUI = false, PlayerEvent onStopped})
+      {double volume = 0.0, bool withShadeUI = false, PlayerEvent? onStopped})
       : _onStopped = onStopped {
     _track = Track.fromURL(url);
     QuickPlay._internal(volume, withShadeUI);
@@ -138,10 +138,10 @@ class QuickPlay {
   /// Pass a callback to [onStopped] if you want to be notified
   /// that audio has stopped playing.
   QuickPlay.fromBuffer(Uint8List dataBuffer,
-      {double volume,
-      @required MediaFormat mediaFormat,
+      {double volume = 0.0,
+      required MediaFormat mediaFormat,
       bool withShadeUI = false,
-      PlayerEvent onStopped})
+      PlayerEvent? onStopped})
       : _onStopped = onStopped {
     _track = Track.fromBuffer(dataBuffer, mediaFormat: mediaFormat);
     QuickPlay._internal(volume, withShadeUI);
@@ -150,12 +150,12 @@ class QuickPlay {
   /// Starts playback.
 
   Future<void> _play(double volume) async {
-    _player.setVolume(volume);
-    _player.audioFocus(AudioFocus.focusAndHushOthers);
-    _player.onStopped = ({wasUser}) {
-      _player.release();
-      if (_onStopped != null) _onStopped();
+    _player?.setVolume(volume);
+    _player?.audioFocus(AudioFocus.focusAndHushOthers);
+    _player?.onStopped = ({bool wasUser = false}) {
+      _player!.release();
+      if (_onStopped != null) _onStopped!();
     };
-    return _player.play(_track);
+    return _player?.play(_track!);
   }
 }

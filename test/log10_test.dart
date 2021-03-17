@@ -10,7 +10,7 @@ void main() {
     var track =
         Track.fromFile(recording, mediaFormat: WellKnownMediaFormats.adtsAac);
     var recorder = SoundRecorder();
-    recorder.onStopped = ({wasUser}) {
+    recorder.onStopped = ({wasUser = false}) {
       recorder.release();
 
       /// recording has finished so play it back to the user.
@@ -45,7 +45,7 @@ void main() {
         ));
 
     var recorder = SoundRecorder();
-    recorder.onStopped = ({wasUser}) {
+    recorder.onStopped = ({wasUser = false}) {
       recorder.release();
     };
 
@@ -63,9 +63,10 @@ void main() {
 
   test('Sound Recorder #Monitoring progress ', () {
     // ignore: omit_local_variable_types
-    Stream<RecordingDisposition> stream = SoundRecorder()
-        .dispositionStream(interval: Duration(milliseconds: 100));
-    stream.listen((disposition) {});
+    Stream<RecordingDisposition>? stream = SoundRecorder()
+        .dispositionStream
+        ?.call(interval: Duration(milliseconds: 100));
+    stream?.listen((disposition) {});
   });
 
   test('Sound Recorder #Stopping a recording ', () {

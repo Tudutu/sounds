@@ -23,7 +23,7 @@ import '../sound_recorder.dart';
 /// Its main job is turn plugin updates into a stream.
 class RecordingDispositionManager {
   final SoundRecorder _recorder;
-  StreamController<RecordingDisposition> _dispositionController;
+  StreamController<RecordingDisposition>? _dispositionController;
 
   /// The duration between updates to the stream.
   /// Defaults to [10ms].
@@ -35,7 +35,7 @@ class RecordingDispositionManager {
   Duration lastDuration;
 
   /// ctor
-  RecordingDispositionManager(this._recorder);
+  RecordingDispositionManager(this._recorder) : lastDuration = Duration.zero;
 
   /// Returns a stream of RecordingDispositions
   /// The stream is a broadcast stream and can be called
@@ -45,7 +45,7 @@ class RecordingDispositionManager {
   /// This is the minimum [interval] and updates may be less
   /// frequent.
   /// Updates will stop if the recorder is paused.
-  Stream<RecordingDisposition> stream({Duration interval}) {
+  Stream<RecordingDisposition>? stream({Duration? interval}) {
     var subscriptionRequired = false;
     if (_dispositionController == null) {
       _dispositionController = StreamController.broadcast();
@@ -60,9 +60,9 @@ class RecordingDispositionManager {
 
     // interval has changed or this is the first time througn
     if (subscriptionRequired) {
-      recorderSetProgressInterval(_recorder, interval);
+      recorderSetProgressInterval(_recorder, this.interval);
     }
-    return _dispositionController.stream;
+    return _dispositionController?.stream;
   }
 
   /// Sends a disposition if the [interval] has elapsed since
@@ -71,8 +71,8 @@ class RecordingDispositionManager {
   /// since the last update hasn't lapsed.
   void updateDisposition(Duration duration, double decibels) {
     lastDuration = duration;
-    if (_dispositionController != null) {
-      _dispositionController.add(RecordingDisposition(duration, decibels));
+    if (_dispositionController != null && duration != null) {
+      _dispositionController!.add(RecordingDisposition(duration, decibels));
     }
   }
 
@@ -80,7 +80,7 @@ class RecordingDispositionManager {
   /// api so we can release any attached resources.
   void release() {
     if (_dispositionController != null) {
-      _dispositionController
+      _dispositionController!
         // TODO signal that the stream is closed?
         // ..add(null) // We keep that strange line for backward compatibility
         ..close();
