@@ -165,7 +165,7 @@ class SoundRecorderUIState extends State<SoundRecorderUI> {
 
   ///
   Stream<RecordingDisposition>? get dispositionStream =>
-      _recorder?.dispositionStream();
+      _recorder.dispositionStream();
 
   // _minDbCircle so the animated circle is always a
   // reasonable size (db ranges is typically 45 - 80db)

@@ -61,7 +61,7 @@ class _RecordPlaybackControllerState {
   /// Stops both the player and the recorder.
   void stop() {
     _playerState?.stop();
-    _recorderState?.stop();
+    _recorderState.stop();
   }
 
   void _onRecorderStarted() {

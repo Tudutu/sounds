@@ -50,7 +50,7 @@ class PlaybarSliderState extends State<PlaybarSlider> {
               var disposition = snapshot.data;
               return Slider(
                 max: disposition!.duration.inMilliseconds.toDouble(),
-                value: disposition!.position.inMilliseconds.toDouble(),
+                value: disposition.position.inMilliseconds.toDouble(),
                 onChanged: (value) =>
                     widget._seek(Duration(milliseconds: value.toInt())),
               );
