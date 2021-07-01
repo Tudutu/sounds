@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:device_info/device_info.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:sounds_common/sounds_common.dart';
 
 import 'adts_aac_media_format.dart';
@@ -49,7 +49,7 @@ class NativeMediaFormats implements MediaProvider {
 
       var deviceInfo = DeviceInfoPlugin();
       var androidInfo = await deviceInfo.androidInfo;
-      if (androidInfo.version.sdkInt >= 21) {
+      if (androidInfo.version.sdkInt! >= 21) {
         supported.add(OggOpusMediaFormat());
       }
     }
@@ -73,7 +73,7 @@ class NativeMediaFormats implements MediaProvider {
       // android
       var deviceInfo = DeviceInfoPlugin();
       var androidInfo = await deviceInfo.androidInfo;
-      if (androidInfo.version.sdkInt >= 29) {
+      if (androidInfo.version.sdkInt! >= 29) {
         supported.add(OggOpusMediaFormat());
         supported.add(OggVorbisMediaFormat());
       }

@@ -42,20 +42,21 @@ enum _RecorderState {
 ///
 typedef RequestPermission = Future<bool> Function(Track track);
 
+///
 typedef RecorderEventWithCause = void Function({bool wasUser});
 
 /// Provide an API for recording audio.
 class SoundRecorder implements SlotEntry {
   final SoundRecorderPlugin _plugin;
 
-  RecorderEventWithCause _onPaused;
-  RecorderEventWithCause _onResumed;
-  RecorderEventWithCause _onStarted;
-  RecorderEventWithCause _onStopped;
+  RecorderEventWithCause? _onPaused;
+  RecorderEventWithCause? _onResumed;
+  RecorderEventWithCause? _onStarted;
+  RecorderEventWithCause? _onStopped;
 
   _RecorderState _recorderState = _RecorderState.isStopped;
 
-  RecordingDispositionManager _dispositionManager;
+  RecordingDispositionManager? _dispositionManager;
 
   /// [SoundRecorder] calls the [onRequestPermissions] callback
   /// to give you a chance to grant the necessary permissions.
@@ -79,7 +80,7 @@ class SoundRecorder implements SlotEntry {
   /// At a minimum SoundRecorder requires access to the microphone
   /// and possibly external storage if the recording is to be placed
   /// on external storage.
-  RequestPermission onRequestPermissions;
+  RequestPermission? onRequestPermissions;
 
   /// track the total time we hav been paused during
   /// the current recording player.
@@ -88,10 +89,10 @@ class SoundRecorder implements SlotEntry {
   /// If we have paused during the current recording player this
   /// will be the time
   /// the most recent pause commenced.
-  DateTime _pauseStarted;
+  DateTime? _pauseStarted;
 
   /// The track we are recording to.
-  RecordingTrack _recordingTrack;
+  RecordingTrack? _recordingTrack;
 
   /// Used to flag that the recorder is ready to record.
   /// When this completion completes [_recorderReady] is set
@@ -99,7 +100,7 @@ class SoundRecorder implements SlotEntry {
   Completer<bool> _recorderReadyCompletion = Completer<bool>();
 
   /// Used to wait for the plugin to connect us to an OS MediaPlayer
-  Future<bool> _recorderReady;
+  Future<bool>? _recorderReady;
 
   /// When we do a [_softRelease] we need to flag that the plugin
   /// needs to be re-initialized so we set this to true.
@@ -140,7 +141,7 @@ class SoundRecorder implements SlotEntry {
     _recorderReady = _recorderReadyCompletion.future;
   }
 
-  Future<R> _initializeAndRun<R>(Future<R> Function() run) async {
+  Future<R?> _initializeAndRun<R>(Future<R> Function() run) async {
     if (_pluginInitRequired) {
       _pluginInitRequired = false;
 
@@ -161,7 +162,7 @@ class SoundRecorder implements SlotEntry {
       assert(_recorderReady != null);
     }
 
-    return _recorderReady.then((ready) {
+    return _recorderReady?.then((ready) {
       if (ready) {
         return run();
       } else {
@@ -181,7 +182,7 @@ class SoundRecorder implements SlotEntry {
           'Did you call release() twice?');
     }
     return _initializeAndRun(() async {
-      _dispositionManager.release();
+      _dispositionManager?.release();
       await _softRelease();
       _recordingTrack?.release();
       _plugin.release(this);
@@ -211,13 +212,13 @@ class SoundRecorder implements SlotEntry {
   }
 
   /// Future indicating if initialisation has completed.
-  Future<bool> get initialized => _recorderReady;
+  Future<bool> get initialized => _recorderReady ?? Future.value(false);
 
   /// callback occurs when the OS Recorder completes initialisatin.
   /// TODO: implement the _onRecorderReady event from
   /// the native OS plugins.
   /// [result] true if the recorder init completed successfully.
-  void _onRecorderReady({bool result}) {
+  void _onRecorderReady({required bool result}) {
     _recorderReadyCompletion.complete(result);
   }
 
@@ -292,11 +293,11 @@ class SoundRecorder implements SlotEntry {
           RecordingTrack(track, track.mediaFormat as NativeMediaFormat);
 
       /// Throws an exception if the path isn't valid.
-      _recordingTrack.validatePath();
+      _recordingTrack!.validatePath();
 
       /// the MediaFormat must be supported.
       if (!await NativeMediaFormats()
-          .isNativeEncoder(_recordingTrack.track.mediaFormat)) {
+            .isNativeEncoder(_recordingTrack!.track.mediaFormat!)) {
         var exception = MediaFormatException('MediaFormat not supported.');
         started.completeError(exception);
         throw exception;
@@ -306,17 +307,17 @@ class SoundRecorder implements SlotEntry {
       var hasPermissions = true;
 
       if (onRequestPermissions != null) {
-        hasPermissions = await onRequestPermissions(track);
+        hasPermissions = await onRequestPermissions!(track);
       }
 
       if (hasPermissions) {
         _timePaused = Duration(seconds: 0);
 
-        await _plugin.start(this, _recordingTrack.track.path,
-            _recordingTrack.mediaFormat, audioSource, quality);
+        await _plugin.start(this, _recordingTrack!.track.path!,
+            _recordingTrack!.mediaFormat, audioSource, quality);
 
         _recorderState = _RecorderState.isRecording;
-        if (_onStarted != null) _onStarted(wasUser: true);
+        if (_onStarted != null) _onStarted!(wasUser: true);
       } else {
         Log.d('Call to SoundRecorder.record() failed as '
             'onRequestPermissions() returned false');
@@ -341,9 +342,9 @@ class SoundRecorder implements SlotEntry {
   /// time that it is sent.
   /// Set the [interval] to control the time between each
   /// event. [interval] defaults to 10ms.
-  Stream<RecordingDisposition> dispositionStream(
+  Stream<RecordingDisposition>? dispositionStream(
       {Duration interval = const Duration(milliseconds: 10)}) {
-    return _dispositionManager.stream(interval: interval);
+    return _dispositionManager?.stream(interval: interval);
   }
 
   /// Stops the current recording.
@@ -364,10 +365,12 @@ class SoundRecorder implements SlotEntry {
       _recorderState = _RecorderState.isStopped;
 
       /// send final db so any listening UI is reset.
-      _dispositionManager.updateDisposition(
-          _dispositionManager.lastDuration, 0);
+      if(_dispositionManager != null) {
+        _dispositionManager!.updateDisposition(
+          _dispositionManager!.lastDuration, 0);
+      }
 
-      if (_onStopped != null) _onStopped(wasUser: true);
+      if (_onStopped != null) _onStopped!(wasUser: true);
     });
   }
 
@@ -384,7 +387,7 @@ class SoundRecorder implements SlotEntry {
       await _plugin.pause(this);
       _pauseStarted = DateTime.now();
       _recorderState = _RecorderState.isPaused;
-      if (_onPaused != null) _onPaused(wasUser: true);
+      if (_onPaused != null) _onPaused!(wasUser: true);
     });
   }
 
@@ -398,7 +401,9 @@ class SoundRecorder implements SlotEntry {
     }
 
     await _initializeAndRun(() async {
-      _timePaused += (DateTime.now().difference(_pauseStarted));
+      if(_pauseStarted != null) {
+        _timePaused += (DateTime.now().difference(_pauseStarted!));
+      }
 
       try {
         await _plugin.resume(this);
@@ -408,7 +413,7 @@ class SoundRecorder implements SlotEntry {
         rethrow;
       }
       _recorderState = _RecorderState.isRecording;
-      if (_onResumed != null) _onResumed(wasUser: true);
+      if (_onResumed != null) _onResumed!(wasUser: true);
     });
   }
 
@@ -422,7 +427,7 @@ class SoundRecorder implements SlotEntry {
   }
 
   /// Returns the duration of the recording
-  Duration get duration => _dispositionManager.lastDuration;
+  Duration? get duration => _dispositionManager?.lastDuration;
 
   /// Call by the plugin to notify us that the duration of the recording
   /// has changed.
@@ -435,8 +440,8 @@ class SoundRecorder implements SlotEntry {
   void _updateProgress(Duration elapsedDuration, double decibels) {
     var duration = elapsedDuration - _timePaused;
     // Log.d('update duration called: $elapsedDuration');
-    _dispositionManager.updateDisposition(duration, decibels);
-    _recordingTrack.duration = duration;
+    _dispositionManager?.updateDisposition(duration, decibels);
+    _recordingTrack?.duration = duration;
   }
 
   ///

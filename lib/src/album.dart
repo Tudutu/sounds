@@ -9,35 +9,35 @@ typedef TrackChange = Track Function(int currentTrackIndex, Track current);
 /// the OS's builtin audio UI.
 ///
 class Album {
-  SoundPlayer _player;
+  late SoundPlayer _player;
 
   final bool _virtualAlbum;
 
-  List<Track> _tracks;
+  late List<Track> _tracks;
 
   var _currentTrackIndex = 0;
 
   /// Returns the track that is currently selected.
-  Track _currentTrack;
+  Track? _currentTrack;
 
   /// If you use the [Album.virtual] constructor then
   /// you must provide a handler for [onFirstTrack].
   /// This should return the first track of the album.
   /// This call may be made multiple times (each time
   /// the method [play] is called).
-  Track Function() onFirstTrack;
+  Track Function()? onFirstTrack;
 
   /// If you use the [Album.virtual] constructor then
   /// you need to provide a handlers for [onSkipForward]
   /// method.
   /// see [Album.virtual()] for details.
-  TrackChange onSkipForward;
+  TrackChange? onSkipForward;
 
   /// If you use the [Album.virtual] constructor then
   /// you need to provide a handlers for [onSkipbackward]
   /// method.
   /// see [Album.virtual()] for details.
-  TrackChange onSkipBackward;
+  TrackChange? onSkipBackward;
 
   /// Creates an album of tracks which will be played
   /// via the OS' built in player.
@@ -46,7 +46,8 @@ class Album {
   /// By default the Album displays on the OS' audio player.
   /// To suppress the OS' audio player pass [SoundPlayer.noUI()]
   /// to [player].
-  Album.fromTracks(this._tracks, SoundPlayer player) : _virtualAlbum = false {
+  Album.fromTracks(List<Track> tracks, SoundPlayer? player) 
+  : _virtualAlbum = false, _tracks = tracks {
     Album._internal(player, _virtualAlbum);
 
     if (_tracks.isEmpty) {
@@ -54,7 +55,7 @@ class Album {
     }
   }
 
-  Album._internal(SoundPlayer player, bool virtualAlbum)
+  Album._internal(SoundPlayer? player, bool virtualAlbum)
       : _virtualAlbum = virtualAlbum {
     _player = player ?? SoundPlayer.withShadeUI();
 
@@ -75,11 +76,11 @@ class Album {
   /// The Album will not allow the user to skip back past the first
   /// track you supplied so there is no looping back over the start
   /// of an album.
-  Album.virtual(SoundPlayer player) : _virtualAlbum = true {
+  Album.virtual(SoundPlayer player) : _virtualAlbum = true, _tracks = const [] {
     Album._internal(player, _virtualAlbum);
   }
 
-  void _onStopped({bool wasUser}) {}
+  void _onStopped({bool wasUser = false}) {}
 
   void _skipBackward() {
     if (_currentTrackIndex > 1) {
@@ -99,7 +100,7 @@ class Album {
   }
 
   void _skipForward() {
-    if (_tracks == null || _currentTrackIndex < _tracks.length - 1) {
+    if (_currentTrackIndex < _tracks.length - 1) {
       stop(wasUser: true);
 
       _currentTrack = _nextTrack();
@@ -115,15 +116,15 @@ class Album {
   /// finds the previous track.
   /// If the album is virtual it calls out
   /// to get the next track.
-  Track _previousTrack() {
-    Track previous;
+  Track? _previousTrack() {
+    Track? previous;
     var originalIndex = _currentTrackIndex;
     _currentTrackIndex--;
-    if (_virtualAlbum) {
+    if (_virtualAlbum && _currentTrack != null) {
       if (onSkipBackward != null) {
-        previous = onSkipBackward(
+        previous = onSkipBackward!(
           originalIndex,
-          _currentTrack,
+          _currentTrack!,
         );
       }
     } else {
@@ -135,15 +136,15 @@ class Album {
   /// finds the next track .
   /// If the album is virtual it calls out
   /// to get the next track.
-  Track _nextTrack() {
-    Track next;
+  Track? _nextTrack() {
+    Track? next;
     var originalIndex = _currentTrackIndex;
     _currentTrackIndex++;
     if (_virtualAlbum) {
-      if (onSkipForward != null) {
-        next = onSkipForward(
+      if (onSkipForward != null && _currentTrack != null) {
+        next = onSkipForward!(
           originalIndex,
-          _currentTrack,
+          _currentTrack!,
         );
       }
     } else {
@@ -155,18 +156,20 @@ class Album {
   /// Start the album playing from the first track.
   void play() {
     _currentTrackIndex = 0;
-    if (_virtualAlbum) {
-      _currentTrack = onFirstTrack();
+    if (_virtualAlbum && onFirstTrack != null) {
+      _currentTrack = onFirstTrack!();
     } else {
       _currentTrack = _tracks[_currentTrackIndex];
     }
-    _player.play(_currentTrack);
+    _player.play(_currentTrack!);
   }
 
   /// stop the album playing.
-  void stop({@required bool wasUser}) {
+  void stop({required bool wasUser}) {
     _player.stop(wasUser: wasUser);
-    trackRelease(_currentTrack);
+    if(_currentTrack != null) {
+      trackRelease(_currentTrack!);
+    }
   }
 
   /// pause the album playing

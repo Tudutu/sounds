@@ -73,10 +73,10 @@ class SoundExampleApp extends StatelessWidget {
 
     if (usingExternalStorage) {
       /// only required if track is on external storage
-      if (Permission.storage.status == PermissionStatus.undetermined) {
-        print('You are probably missing the storage permission '
-            'in your manifest.');
-      }
+      // if (Permission.storage.status == PermissionStatus.undetermined) {
+      //   print('You are probably missing the storage permission '
+      //       'in your manifest.');
+      // }
 
       storageRequired =
           usingExternalStorage && !await Permission.storage.isGranted;

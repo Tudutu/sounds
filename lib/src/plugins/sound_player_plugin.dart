@@ -25,12 +25,12 @@ import 'player_base_plugin.dart';
 ///
 // ignore: prefer_mixin
 class SoundPlayerPlugin extends PlayerBasePlugin {
-  static SoundPlayerPlugin _self;
+  static SoundPlayerPlugin? _self;
 
   /// Factory
   factory SoundPlayerPlugin() {
     _self ??= SoundPlayerPlugin._internal();
-    return _self;
+    return _self!;
   }
   SoundPlayerPlugin._internal() : super('com.bsutton.sounds.sound_player');
 

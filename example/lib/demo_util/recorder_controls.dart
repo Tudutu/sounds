@@ -12,7 +12,7 @@ import 'recorder_state.dart';
 class RecorderControls extends StatefulWidget {
   /// ctor
   const RecorderControls({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override

@@ -34,11 +34,11 @@ class SlotEntry {}
 // ignore: prefer_mixin
 abstract class BasePlugin with WidgetsBindingObserver {
   /// ignore: prefer_final_fields
-  List<SlotEntry> _slots;
+  List<SlotEntry?> _slots;
 
   ///
   @protected
-  MethodChannel _channel;
+  late MethodChannel _channel;
 
   /// The registered name of the plugin.
   final String _registeredName;
@@ -50,7 +50,7 @@ abstract class BasePlugin with WidgetsBindingObserver {
     _channel = MethodChannel(_registeredName);
     _channel.setMethodCallHandler(_onMethodCallback);
 
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance!.addObserver(this);
   }
 
   /// This method is currently not used as we are a singleton
@@ -59,7 +59,7 @@ abstract class BasePlugin with WidgetsBindingObserver {
   /// these events until the app stops in which case it will
   /// be freed automatically.
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance!.removeObserver(this);
   }
 
   @override
@@ -93,7 +93,11 @@ abstract class BasePlugin with WidgetsBindingObserver {
     //     '${slotEntry?.runtimeType}',
     //     supressDuplicates: true);
 
-    return onMethodCallback(slotEntry, call);
+    if (slotEntry != null) {
+      return onMethodCallback(slotEntry, call);
+    } else {
+      return Future<dynamic>.value(null);
+    }
   }
 
   /// Invokes a method in the platform specific plugin for the

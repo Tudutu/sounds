@@ -24,12 +24,12 @@ import 'player_base_plugin.dart';
 
 ///
 class SoundPlayerShadePlugin extends PlayerBasePlugin {
-  static SoundPlayerShadePlugin _self;
+  static SoundPlayerShadePlugin? _self;
 
   /// Factory
   factory SoundPlayerShadePlugin() {
     _self ??= SoundPlayerShadePlugin._internal();
-    return _self;
+    return _self!;
   }
   SoundPlayerShadePlugin._internal()
       : super('com.bsutton.sounds.sounds_shade_player');
@@ -99,7 +99,7 @@ class SoundPlayerShadePlugin extends PlayerBasePlugin {
       default:
         super.onMethodCallback(player, call);
     }
-    return null;
+    return Future<dynamic>.value(-1);
   }
 }
 

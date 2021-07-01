@@ -26,7 +26,7 @@ abstract class PlayerBasePlugin extends BasePlugin {
   /// name of the plugin.
   PlayerBasePlugin(String registeredName) : super(registeredName, _slots);
 
-  ConnectedCallback _onPlayerReady;
+  ConnectedCallback? _onPlayerReady;
 
   /// The callbackMap is used to map callbacks to a completer
   /// created by the originator of the callback.
@@ -111,7 +111,7 @@ abstract class PlayerBasePlugin extends BasePlugin {
     var uuid = json['callbackUuid'] as String;
 
     // complete the future waiting for this call to return.
-    _callbackMap[uuid].complete(duration);
+    _callbackMap[uuid]?.complete(duration);
   }
 
   ///
@@ -157,7 +157,7 @@ abstract class PlayerBasePlugin extends BasePlugin {
   /// The caller can manage the audio focus with this function
   /// If [request] is true then we request the focus
   /// If [request] is false then we abandon the focus.
-  Future<void> audioFocus(SlotEntry slotEntry, {bool request}) async {
+  Future<void> audioFocus(SlotEntry slotEntry, {bool? request}) async {
     await invokeMethod(
         slotEntry, 'setActive', <String, dynamic>{'enabled': request});
   }
@@ -199,7 +199,7 @@ abstract class PlayerBasePlugin extends BasePlugin {
         {
           var result = call.arguments['arg'] as bool;
           Log.d('onPlayerReady $result');
-          if (_onPlayerReady != null) _onPlayerReady(result: result);
+          _onPlayerReady?.call(result: result);
         }
         break;
 
@@ -259,7 +259,7 @@ abstract class PlayerBasePlugin extends BasePlugin {
           /// If there is an outstanding callback then complete it
           /// so the UI doesn't hang.
           if (callbackUuid != null) {
-            _callbackMap[callbackUuid].completeError(description);
+            _callbackMap[callbackUuid]?.completeError(description);
           }
 
           audio_player.onSystemError(player, description);
@@ -269,7 +269,7 @@ abstract class PlayerBasePlugin extends BasePlugin {
       default:
         throw ArgumentError('Unknown method ${call.method}');
     }
-    return null;
+    return Future<dynamic>.value(-1);
   }
 
   /// Called when the OS resumes our app.

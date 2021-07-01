@@ -14,8 +14,8 @@ class Dropdowns extends StatefulWidget {
 
   /// ctor
   const Dropdowns({
-    Key key,
-    @required void Function(MediaFormat) onMediaFormatChanged,
+    Key? key,
+    required void Function(MediaFormat) onMediaFormatChanged,
   })  : _onMediaFormatChanged = onMediaFormatChanged,
         super(key: key);
 

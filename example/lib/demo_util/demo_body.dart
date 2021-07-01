@@ -18,7 +18,7 @@ import 'remote_player.dart';
 class MainBody extends StatefulWidget {
   ///
   const MainBody({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override

@@ -9,9 +9,9 @@ class TrackSwitch extends StatefulWidget {
 
   /// ctor
   const TrackSwitch({
-    Key key,
-    @required bool isAudioPlayer,
-    @required void Function(bool userOSUI) switchPlayer,
+    Key? key,
+    required bool isAudioPlayer,
+    required void Function(bool userOSUI) switchPlayer,
   })  : _isAudioPlayer = isAudioPlayer,
         _switchPlayer = switchPlayer,
         super(key: key);
